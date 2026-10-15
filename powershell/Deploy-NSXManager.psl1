@@ -1,0 +1,56 @@
+# 1. Configuration
+$vCenterServer = "10.#.#.#"
+$ClusterName    = "Cluster-A"
+$DatastoreName  = "Datastore-A"
+$PortgroupName  = "Portgroup-A"
+$OvaFilePath    = "C:\Users\Administrator\NSX\nsx-unified-appliance-#####.ova"
+$VMName         = "NSX-Manager-01"
+
+# 2. Connection
+Set-PowerCLIConfiguration -InvalidCertificateAction Ignore -Confirm:$false | Out-Null
+Write-Host "Connecting to vCenter..." -ForegroundColor Cyan
+$viserver = Connect-VIServer -Server $vCenterServer -ErrorAction Stop
+
+# 3. Get Targets
+$cluster   = Get-Cluster -Name $ClusterName -ErrorAction Stop
+$datastore = Get-Datastore -Name $DatastoreName -ErrorAction Stop
+$vmHost    = Get-VMHost -Location $cluster | Where-Object { $_.ConnectionState -eq "Connected" } | Select-Object -First 1
+
+$network   = Get-VDPortgroup -Name $PortgroupName -ErrorAction SilentlyContinue
+if (-not $network) {
+    $network = Get-VirtualNetwork -Name $PortgroupName -ErrorAction Stop
+}
+
+# 4. OVF Config
+Write-Host "Parsing OVA..." -ForegroundColor Cyan
+$ovfConfig = Get-OvfConfiguration -Ovf $OvaFilePath
+
+if ($ovfConfig.DeploymentOption) { $ovfConfig.DeploymentOption.Value = "medium" }
+if ($ovfConfig.NetworkMapping) {
+    $netProperty = $ovfConfig.NetworkMapping | Get-Member -MemberType NoteProperty | Select-Object -First 1
+    if ($netProperty) { $ovfConfig.NetworkMapping.$($netProperty.Name).Value = $network }
+}
+
+# Set OVF Properties
+$ovfConfig.Common.nsx_passwd_0.Value           = "#####"
+$ovfConfig.Common.nsx_cli_passwd_0.Value       = "#####"
+$ovfConfig.Common.nsx_cli_audit_passwd_0.Value = "#####"
+$ovfConfig.Common.nsx_hostname.Value           = "nsx-mgr-01.domain.local"
+$ovfConfig.Common.nsx_ip_0.Value               = "10.#.#.#"
+$ovfConfig.Common.nsx_netmask_0.Value          = "255.255.255.0"
+$ovfConfig.Common.nsx_gateway_0.Value          = "10.#.#.#"
+$ovfConfig.Common.nsx_dns1_0.Value             = "10.#.#.#"
+$ovfConfig.Common.nsx_ntp_0.Value              = "10.#.#.#"
+$ovfConfig.Common.nsx_domain_0.Value           = "domain.local"
+
+# Set SSH enabled using native boolean $true
+$ovfConfig.Common.nsx_isSSHEnabled.Value       = $true
+
+# 5. Deployment
+Write-Host "Deploying VM..." -ForegroundColor Yellow
+$vm = Import-VApp -Source $OvaFilePath -Name $VMName -OvfConfiguration $ovfConfig -VMHost $vmHost -Datastore $datastore -DiskStorageFormat Thin -ErrorAction Stop
+
+# 6. Power On
+Write-Host "Powering on $VMName..." -ForegroundColor Cyan
+Start-VM -VM $vm -Confirm:$false
+Write-Host "Deployment completed successfully!" -ForegroundColor Green
