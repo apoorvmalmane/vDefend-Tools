@@ -12,10 +12,10 @@
 # Hosts are discovered via the NSX API (fabric/discovered-nodes), optionally per cluster.
 #
 # Usage:
-#   ./esx_run.sh -l                         # list clusters
-#   ./esx_run.sh                            # run on all hosts, output to console
-#   ./esx_run.sh -c "Cluster-A"             # one cluster only
-#   ./esx_run.sh -c "Cluster-A" -o out.txt  # console + text file
+#   ./esx_dfw_health.sh -l                         # list clusters
+#   ./esx_dfw_health.sh                            # run on all hosts, output to console
+#   ./esx_dfw_health.sh -c "Cluster-A"             # one cluster only
+#   ./esx_dfw_health.sh -c "Cluster-A" -o out.txt  # console + text file
 #
 # Options:
 #   -n <nsx>   NSX Manager address (default: 127.0.0.1)
