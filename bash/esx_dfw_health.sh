@@ -1,16 +1,20 @@
 #!/bin/bash
-# Author: Apoorv Malmane
-# DISCLAIMER: This is a personal troubleshooting script intended solely for 
-# log analysis (e.g., identifying high-frequency logging events and active VIFs). 
-# It is provided "as is" without warranty or performance guarantees. Users are 
-# encouraged to adapt and re-use this script for other ESXi shell diagnostic 
-# tasks. Use at your own risk; the author assumes no liability for execution 
-# impact, log contention, or unintended host behavior.
+# Author: Apoorv Malmane <apoorv.malmane@broadcom.com>
 #
-#
-# Run commands on ESXi hosts managed by NSX, from the NSX Manager shell.
+# DISCLAIMER: This script is provided "as is", without warranty of any kind and
+# without official support. It logs in to ESXi hosts as the configured user
+# (root by default) and runs the commands listed below, so review those commands
+# before use and try the script on a non-production cluster first. The author
+# accepts no liability for any impact, data loss or outage resulting from its use.
+# 
+# ======================= What does this script do? ======================= 
+# This script runs commands on ESXi hosts managed by NSX, from the NSX Manager shell.
+# This script currently performs Health analysis (e.g., identifying high-frequency logging events and active VIFs). 
+# Users are encouraged to adapt and re-use this script for other ESXi shell diagnostic tasks
+# 
 # Hosts are discovered via the NSX API (fabric/discovered-nodes), optionally per cluster.
 #
+# =======================  How to use the script ======================= 
 # Usage:
 #   ./esx_dfw_health.sh -l                         # list clusters
 #   ./esx_dfw_health.sh                            # run on all hosts, output to console
