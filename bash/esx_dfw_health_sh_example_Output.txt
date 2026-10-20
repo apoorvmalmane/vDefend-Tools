@@ -1,22 +1,26 @@
-===>** Indentify all the clusters
-root@nsx-mngr-01:~# ./esx_dfw_health.sh -l
+# How-To use esx_dfw_health.sh 
+
+## Introduction
+
+**Identify all the clusters**
+```root@nsx-mngr-01:~# ./esx_dfw_health.sh -l
 NSX admin password:
 Cluster-A   bd2e1d19-aaaa-1111-8eca-############:domain-c3
-Cluster-B   bd2e1d19-aaaa-1111-8eca-############:domain-c24
+Cluster-B   bd2e1d19-aaaa-1111-8eca-############:domain-c24```
 
-===>** Run on Entire Environment
+**Run on Entire Environment**
 root@nsx-mngr-01:~# ./esx_dfw_health.sh
 NSX admin password:
 ESXi root password:
 <SNIP: Example NOT shown. The output will be similar to Cluster Run>
 
-===>** Run on Multiple Cluster
+**Run on Multiple Cluster**
 root@nsx-mngr-01:~# ./esx_dfw_health.sh -c Cluster-A -c Cluster-B
 NSX admin password:
 ESXi root password:
 <SNIP: Example NOT shown. The output will be similar to Cluster Run>
 
-===>** Running Per Cluster
+**Running Per Cluster**
 root@nsx-mngr-01:~# ./esx_dfw_health.sh -c Cluster-A
 NSX admin password:
 ESXi root password:
