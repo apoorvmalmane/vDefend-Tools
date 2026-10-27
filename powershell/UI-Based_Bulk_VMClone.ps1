@@ -120,7 +120,7 @@ $form.Controls.Add($lblVC)
 $txtVC = New-Object System.Windows.Forms.TextBox
 $txtVC.Location = New-Object System.Drawing.Point(220, 182)
 $txtVC.Size = New-Object System.Drawing.Size(185, 20)
-$txtVC.Text = "10.91.8.241"
+$txtVC.Text = "10.#.#.#"
 $form.Controls.Add($txtVC)
 
 # --- Label & Input: Target Datastore ---
@@ -133,7 +133,7 @@ $form.Controls.Add($lblDS)
 $txtDS = New-Object System.Windows.Forms.TextBox
 $txtDS.Location = New-Object System.Drawing.Point(220, 222)
 $txtDS.Size = New-Object System.Drawing.Size(185, 20)
-$txtDS.Text = "LNVMe5.09-10.91.13.210"
+$txtDS.Text = "LNVMe5.09-10.#.#.#"
 $form.Controls.Add($txtDS)
 
 # --- Label & Dropdown: Disk Provisioning ---
@@ -181,7 +181,7 @@ $btnRun.Add_Click({
         $vc = Connect-VIServer -Server $targetVC -ErrorAction Stop
 
         $sourceVM   = Get-VM -Server $vc -Name $sourceVMName -ErrorAction Stop
-        $targetHost = Get-VMHost -Server $vc -Name "10.91.13.210"
+        $targetHost = Get-VMHost -Server $vc -Name "10.#.#.#"
         $targetDS   = Get-Datastore -Server $vc -Name $targetDSName -ErrorAction Stop
 
         1..$count | ForEach-Object {
