@@ -64,7 +64,7 @@ $form.MaximizeBox = $false
 $lblHeader = New-Object System.Windows.Forms.Label
 $lblHeader.Location = New-Object System.Drawing.Point(20, 15)
 $lblHeader.Size = New-Object System.Drawing.Size(410, 35)
-$lblHeader.Text = "Automated VMware VM Deployment Utility`nAuthor: Apoorv | Configure parameters below to initiate automated cloning."
+$lblHeader.Text = "Automated VMware VM Deployment Utility`nAuthor: Apoorv Malmane| Configure parameters below to initiate automated cloning."
 $lblHeader.Font = New-Object System.Drawing.Font("Segoe UI", 8.5, [System.Drawing.FontStyle]::Regular)
 $lblHeader.ForeColor = [System.Drawing.Color]::DarkSlateGray
 $form.Controls.Add($lblHeader)
@@ -79,7 +79,7 @@ $form.Controls.Add($lblSourceVM)
 $txtSourceVM = New-Object System.Windows.Forms.TextBox
 $txtSourceVM.Location = New-Object System.Drawing.Point(220, 62)
 $txtSourceVM.Size = New-Object System.Drawing.Size(185, 20)
-$txtSourceVM.Text = "AM_Ubuntu_22.04.5_10vNIC_DTLS-CloneFrom"
+$txtSourceVM.Text = "AM_SourceVM"
 $form.Controls.Add($txtSourceVM)
 
 # --- Label & Input: VM Name Prefix ---
