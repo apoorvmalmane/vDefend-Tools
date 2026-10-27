@@ -9,7 +9,7 @@
     This script provides a graphical user interface (GUI) built with Windows Forms 
     to facilitate bulk cloning of VMware Virtual Machines on a target vCenter server. 
     Users can specify source VM, clone count, target naming prefix, target datastore,
-    disk provisioning, and power-on settings directly from the UI.
+    target ESXi host, disk provisioning, and power-on settings directly from the UI.
 
 .HOW TO USE THE script
 	a. 
@@ -17,25 +17,21 @@
 	2. Modify the data as needed on UI and Deploy
 	3. Add the vCenter Credential in the pop-up
 
-	
 	OR
 	
 	b. 
 	1. Install VMware PowerCLI (First Time Only)
-	Install-Module -Name VMware.PowerCLI -Scope CurrentUser
-		Press Y or A (Yes to All) if prompted about an untrusted repository.
+	   Install-Module -Name VMware.PowerCLI -Scope CurrentUser
 
 	2. If your vCenter uses self-signed certificates, ignore invalid certificate warnings by running:
-	Set-PowerCLIConfiguration -InvalidCertificateAction Ignore -Confirm:$false
+	   Set-PowerCLIConfiguration -InvalidCertificateAction Ignore -Confirm:$false
 
-	3. Enable Script Execution (First Time Only). Run the following command to allow running local scripts:
-	Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
-		Type Y and press Enter to confirm.
+	3. Enable Script Execution (First Time Only):
+	   Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 
-	4. Execute the Script
-	Change directories to where your file is located. For example, if saved to your Desktop:
-	cd "$HOME\Desktop"
-	.\DeployVMs.ps1
+	4. Execute the Script:
+	   cd "$HOME\Desktop"
+	   .\DeployVMs.ps1
 	
 	5. Modify the data as needed on UI and Deploy
 	6. Add the vCenter Credential in the pop-up
@@ -46,7 +42,6 @@
 .DISCLAIMER: 
 	This script is provided "as is", without warranty of any kind and
 	without official support.
-	
 #>
 
 Add-Type -AssemblyName System.Windows.Forms
@@ -55,7 +50,7 @@ Add-Type -AssemblyName System.Drawing
 # --- Create Window ---
 $form = New-Object System.Windows.Forms.Form
 $form.Text = "VM Deployment Tool"
-$form.Size = New-Object System.Drawing.Size(460, 520)
+$form.Size = New-Object System.Drawing.Size(460, 560)
 $form.StartPosition = "CenterScreen"
 $form.FormBorderStyle = "FixedDialog"
 $form.MaximizeBox = $false
@@ -64,7 +59,7 @@ $form.MaximizeBox = $false
 $lblHeader = New-Object System.Windows.Forms.Label
 $lblHeader.Location = New-Object System.Drawing.Point(20, 15)
 $lblHeader.Size = New-Object System.Drawing.Size(410, 35)
-$lblHeader.Text = "Automated VMware VM Deployment Utility`nAuthor: Apoorv Malmane| Configure parameters below to initiate automated cloning."
+$lblHeader.Text = "Automated VMware VM Deployment Utility`nAuthor: Apoorv Malmane | Configure parameters below to initiate automated cloning."
 $lblHeader.Font = New-Object System.Drawing.Font("Segoe UI", 8.5, [System.Drawing.FontStyle]::Regular)
 $lblHeader.ForeColor = [System.Drawing.Color]::DarkSlateGray
 $form.Controls.Add($lblHeader)
@@ -107,7 +102,7 @@ $numClones.Location = New-Object System.Drawing.Point(220, 142)
 $numClones.Size = New-Object System.Drawing.Size(65, 20)
 $numClones.Minimum = 1
 $numClones.Maximum = 100
-$numClones.Value = 19
+$numClones.Value = 2
 $form.Controls.Add($numClones)
 
 # --- Label & Input: vCenter Target ---
@@ -123,28 +118,41 @@ $txtVC.Size = New-Object System.Drawing.Size(185, 20)
 $txtVC.Text = "10.#.#.#"
 $form.Controls.Add($txtVC)
 
+# --- Label & Input: Target ESXi Host ---
+$lblHost = New-Object System.Windows.Forms.Label
+$lblHost.Location = New-Object System.Drawing.Point(30, 225)
+$lblHost.Size = New-Object System.Drawing.Size(180, 20)
+$lblHost.Text = "Target ESXi Host:"
+$form.Controls.Add($lblHost)
+
+$txtHost = New-Object System.Windows.Forms.TextBox
+$txtHost.Location = New-Object System.Drawing.Point(220, 222)
+$txtHost.Size = New-Object System.Drawing.Size(185, 20)
+$txtHost.Text = "10.#.#.#"
+$form.Controls.Add($txtHost)
+
 # --- Label & Input: Target Datastore ---
 $lblDS = New-Object System.Windows.Forms.Label
-$lblDS.Location = New-Object System.Drawing.Point(30, 225)
+$lblDS.Location = New-Object System.Drawing.Point(30, 265)
 $lblDS.Size = New-Object System.Drawing.Size(180, 20)
 $lblDS.Text = "Target Datastore:"
 $form.Controls.Add($lblDS)
 
 $txtDS = New-Object System.Windows.Forms.TextBox
-$txtDS.Location = New-Object System.Drawing.Point(220, 222)
+$txtDS.Location = New-Object System.Drawing.Point(220, 262)
 $txtDS.Size = New-Object System.Drawing.Size(185, 20)
-$txtDS.Text = "LNVMe5.09-10.#.#.#"
+$txtDS.Text = "DataStore-10.#.#.#"
 $form.Controls.Add($txtDS)
 
 # --- Label & Dropdown: Disk Provisioning ---
 $lblDisk = New-Object System.Windows.Forms.Label
-$lblDisk.Location = New-Object System.Drawing.Point(30, 265)
+$lblDisk.Location = New-Object System.Drawing.Point(30, 305)
 $lblDisk.Size = New-Object System.Drawing.Size(180, 20)
 $lblDisk.Text = "Disk Provisioning:"
 $form.Controls.Add($lblDisk)
 
 $cmbDisk = New-Object System.Windows.Forms.ComboBox
-$cmbDisk.Location = New-Object System.Drawing.Point(220, 262)
+$cmbDisk.Location = New-Object System.Drawing.Point(220, 302)
 $cmbDisk.Size = New-Object System.Drawing.Size(185, 20)
 $cmbDisk.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList
 [void]$cmbDisk.Items.Add("Thin")
@@ -155,7 +163,7 @@ $form.Controls.Add($cmbDisk)
 
 # --- Checkbox: Power On after clone ---
 $chkPowerOn = New-Object System.Windows.Forms.CheckBox
-$chkPowerOn.Location = New-Object System.Drawing.Point(30, 305)
+$chkPowerOn.Location = New-Object System.Drawing.Point(30, 345)
 $chkPowerOn.Size = New-Object System.Drawing.Size(300, 25)
 $chkPowerOn.Text = "Power on VM after creation"
 $chkPowerOn.Checked = $false
@@ -163,25 +171,26 @@ $form.Controls.Add($chkPowerOn)
 
 # --- Run Button ---
 $btnRun = New-Object System.Windows.Forms.Button
-$btnRun.Location = New-Object System.Drawing.Point(150, 370)
+$btnRun.Location = New-Object System.Drawing.Point(150, 410)
 $btnRun.Size = New-Object System.Drawing.Size(150, 42)
 $btnRun.Text = "Start Deployment"
 
 $btnRun.Add_Click({
     $btnRun.Enabled = $false
-    $count         = [int]$numClones.Value
-    $targetVC      = $txtVC.Text
-    $targetDSName  = $txtDS.Text.Trim()
-    $diskFormat    = $cmbDisk.SelectedItem.ToString()
-    $prefix        = $txtPrefix.Text.Trim()
-    $sourceVMName  = $txtSourceVM.Text.Trim()
-    $shouldPowerOn = $chkPowerOn.Checked
+    $count          = [int]$numClones.Value
+    $targetVC       = $txtVC.Text.Trim()
+    $targetHostName = $txtHost.Text.Trim()
+    $targetDSName   = $txtDS.Text.Trim()
+    $diskFormat     = $cmbDisk.SelectedItem.ToString()
+    $prefix         = $txtPrefix.Text.Trim()
+    $sourceVMName   = $txtSourceVM.Text.Trim()
+    $shouldPowerOn  = $chkPowerOn.Checked
 
     try {
         $vc = Connect-VIServer -Server $targetVC -ErrorAction Stop
 
         $sourceVM   = Get-VM -Server $vc -Name $sourceVMName -ErrorAction Stop
-        $targetHost = Get-VMHost -Server $vc -Name "10.#.#.#"
+        $targetHost = Get-VMHost -Server $vc -Name $targetHostName -ErrorAction Stop
         $targetDS   = Get-Datastore -Server $vc -Name $targetDSName -ErrorAction Stop
 
         1..$count | ForEach-Object {
@@ -194,7 +203,8 @@ $btnRun.Add_Click({
                                 -VMHost $targetHost `
                                 -Datastore $targetDS `
                                 -DiskStorageFormat $diskFormat `
-                                -Server $vc
+                                -Server $vc `
+                                -ErrorAction Stop
                 Start-VM -VM $newVM -Confirm:$false -RunAsync
             }
             else {
@@ -205,11 +215,12 @@ $btnRun.Add_Click({
                        -Datastore $targetDS `
                        -DiskStorageFormat $diskFormat `
                        -Server $vc `
-                       -RunAsync
+                       -RunAsync `
+                       -ErrorAction Stop
             }
         }
 
-        $statusMsg = "Successfully processed $count VM clone(s) from '$sourceVMName' ($diskFormat) on datastore '$targetDSName'."
+        $statusMsg = "Successfully processed $count VM clone(s) from '$sourceVMName' ($diskFormat) on host '$targetHostName' and datastore '$targetDSName'."
         if ($shouldPowerOn) {
             $statusMsg += "`nPower-on tasks were initiated."
         }
