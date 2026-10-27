@@ -87,7 +87,7 @@ $form.Controls.Add($lblPrefix)
 $txtPrefix = New-Object System.Windows.Forms.TextBox
 $txtPrefix.Location = New-Object System.Drawing.Point(220, 102)
 $txtPrefix.Size = New-Object System.Drawing.Size(185, 20)
-$txtPrefix.Text = "Apoorv_Ubuntu_22.04.5_DTLS-"
+$txtPrefix.Text = "AM-Cloned-"
 $form.Controls.Add($txtPrefix)
 
 # --- Label & Input: Count ---
