@@ -48,7 +48,7 @@ ESXi version :: vmware -vl
 
 # NSX VIBs :: esxcli software vib list | grep -i nsx
 
-All files :: printf "%-10s %s\n" POSITION TIMESTAMP; (zcat /var/run/log/dfwpktlogs.*.gz 2>/dev/null; cat /var/run/log/dfwpktlogs.log 2>/dev/null) | awk 'NR==1 {print "START", $1} {last=$1} END {print "END", last}'
+Timestamp Range from All files :: printf "%-10s %s\n" POSITION TIMESTAMP; (zcat /var/run/log/dfwpktlogs.*.gz 2>/dev/null; cat /var/run/log/dfwpktlogs.log 2>/dev/null) | awk 'NR==1 {print "START", $1} {last=$1} END {print "END", last}'
 
 Highest logged seconds Top 10 ::  less /var/run/log/dfwpktlogs* | awk -F. '{print $1}' | sort | uniq -c | sort -nrk 1 | head -n 10 | awk 'BEGIN {printf "%-10s %s\n", "COUNT", "TIME_STAMP"} {printf "%-10s %s\n", $1, $2}'
 
