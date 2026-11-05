@@ -48,6 +48,8 @@ ESXi version :: vmware -vl
 
 # NSX VIBs :: esxcli software vib list | grep -i nsx
 
+All files :: printf "%-10s %s\n" POSITION TIMESTAMP; (zcat /var/run/log/dfwpktlogs.*.gz 2>/dev/null; cat /var/run/log/dfwpktlogs.log 2>/dev/null) | awk 'NR==1 {print "START", $1} {last=$1} END {print "END", last}'
+
 Highest logged seconds Top 10 ::  less /var/run/log/dfwpktlogs* | awk -F. '{print $1}' | sort | uniq -c | sort -nrk 1 | head -n 10 | awk 'BEGIN {printf "%-10s %s\n", "COUNT", "TIME_STAMP"} {printf "%-10s %s\n", $1, $2}'
 
 Top 10 VIFs :: printf "%-10s %-9s %s\n" COUNT VIF VM.VNIC; awk '{for(i=1; i<=NF; i++) if($i == "INET" || $i == "INET6") {print $(i-1); next}}' /var/run/log/dfwpktlogs* | sort | uniq -c | sort -nrk 1 | head -n 10 | while read c v; do f=$(vsipioctl getfilters | awk -F' : ' -v v="$v" '/Filter Name/{f=$2} /VIF ID/ && $2 ~ v"$" {print f}'); p=$(summarize-dvfilter | awk -v f="$f" '/^ port /{sub(/^ port [0-9]+ /,""); p=$0} $1=="name:" && $2==f {print p}'); printf "%-10s %-9s %s\n" "$c" "$v" "${p:-<not on this host>}"; done
